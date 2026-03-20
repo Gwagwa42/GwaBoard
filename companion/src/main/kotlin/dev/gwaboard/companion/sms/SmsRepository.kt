@@ -131,7 +131,7 @@ class SmsRepository(
         cursor?.use { c ->
             val idIdx = c.getColumnIndexOrThrow(Telephony.Sms.Conversations.THREAD_ID)
             val snippetIdx = c.getColumnIndexOrThrow(Telephony.Sms.Conversations.SNIPPET)
-            val countIdx = c.getColumnIndexOrThrow(Telephony.Sms.Conversations.MSG_COUNT)
+            val countIdx = c.getColumnIndexOrThrow("msg_count")
 
             while (c.moveToNext()) {
                 val threadId = c.getLong(idIdx)
@@ -204,7 +204,7 @@ class SmsRepository(
         private val THREAD_PROJECTION = arrayOf(
             Telephony.Sms.Conversations.THREAD_ID,
             Telephony.Sms.Conversations.SNIPPET,
-            Telephony.Sms.Conversations.MSG_COUNT,
+            "msg_count",
         )
     }
 }
