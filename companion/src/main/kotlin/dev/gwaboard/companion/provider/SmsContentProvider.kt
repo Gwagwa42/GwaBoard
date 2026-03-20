@@ -6,13 +6,11 @@ import android.content.UriMatcher
 import android.database.Cursor
 import android.database.MatrixCursor
 import android.net.Uri
-import android.os.Bundle
-import android.util.Base64
 import android.util.Log
-import dev.gwaboard.shared.crypto.EncryptedPayload
-import dev.gwaboard.shared.crypto.SessionCipher
 import dev.gwaboard.shared.ipc.SignatureVerifier
 import dev.gwaboard.shared.models.IpcContract
+import dev.gwaboard.shared.models.ContactProfile
+import kotlinx.serialization.json.Json
 
 /**
  * ContentProvider that exposes per-contact SMS profiles to the keyboard app
@@ -29,9 +27,10 @@ import dev.gwaboard.shared.models.IpcContract
  *    verification using [SignatureVerifier], guarding against edge cases where
  *    permission grants could be spoofed.
  *
- * 3. **Payload-level**: All query results are encrypted with AES-256-GCM via
- *    [SessionCipher] before being returned in the cursor. The keyboard app
- *    must decrypt using the same Keystore-backed key.
+ * 3. **Payload-level**: Profile data is returned as plaintext columns in the cursor.
+ *    Encryption was removed because the Keystore key cannot be shared across apps
+ *    (see issue #22). Security relies on layers 1 and 2 (signature permission +
+ *    runtime certificate verification).
  *
  * ## Supported URI patterns
  *
@@ -47,14 +46,15 @@ class SmsContentProvider : ContentProvider() {
         private const val PROFILES_ALL = 1
         private const val PROFILES_BY_CONTACT = 2
 
-        /** Column name for the encrypted payload (Base64-encoded ciphertext) */
-        const val COLUMN_ENCRYPTED_DATA = "encrypted_data"
-
-        /** Column name for the IV (Base64-encoded) needed to decrypt the payload */
-        const val COLUMN_ENCRYPTED_IV = "encrypted_iv"
-
-        /** Column name for the contact ID in encrypted result sets */
-        const val COLUMN_CONTACT_ID = "contact_id"
+        /** Plaintext column names returned in profile query cursors */
+        private val PROFILE_COLUMNS = arrayOf(
+            IpcContract.ProfileColumns.CONTACT_ID,
+            IpcContract.ProfileColumns.DOMINANT_LANGUAGE,
+            IpcContract.ProfileColumns.TONE,
+            IpcContract.ProfileColumns.AVG_RESPONSE_LENGTH,
+            IpcContract.ProfileColumns.TOP_NGRAMS,
+            IpcContract.ProfileColumns.STYLE_EMBEDDING,
+        )
 
         private val uriMatcher = UriMatcher(UriMatcher.NO_MATCH).apply {
             addURI(IpcContract.AUTHORITY, IpcContract.Paths.CONTACT_PROFILES, PROFILES_ALL)
@@ -62,7 +62,7 @@ class SmsContentProvider : ContentProvider() {
         }
     }
 
-    private lateinit var sessionCipher: SessionCipher
+    private val json = Json { ignoreUnknownKeys = true }
 
     /**
      * In-memory profile store. In a real implementation, this would be backed
@@ -72,7 +72,6 @@ class SmsContentProvider : ContentProvider() {
     private val profileStore = ProfileStore()
 
     override fun onCreate(): Boolean {
-        sessionCipher = SessionCipher()
         return true
     }
 
@@ -108,55 +107,54 @@ class SmsContentProvider : ContentProvider() {
     // ── Query implementations ─────────────────────────────────────────
 
     /**
-     * Returns all available contact profiles, each row encrypted individually.
+     * Returns all available contact profiles as plaintext columns.
      *
-     * Cursor columns:
-     * - [COLUMN_CONTACT_ID]: the contact ID (unencrypted, needed for routing)
-     * - [COLUMN_ENCRYPTED_DATA]: Base64-encoded AES-256-GCM ciphertext of the profile JSON
-     * - [COLUMN_ENCRYPTED_IV]: Base64-encoded IV for decryption
+     * Cursor columns match [IpcContract.ProfileColumns]:
+     * - contact_id, dominant_language, tone, avg_response_length, top_ngrams, style_embedding
      */
     private fun queryAllProfiles(): Cursor {
-        val cursor = MatrixCursor(
-            arrayOf(COLUMN_CONTACT_ID, COLUMN_ENCRYPTED_DATA, COLUMN_ENCRYPTED_IV),
-        )
+        val cursor = MatrixCursor(PROFILE_COLUMNS)
 
         for ((contactId, profileJson) in profileStore.getAllProfiles()) {
-            val encrypted = sessionCipher.encrypt(profileJson.toByteArray(Charsets.UTF_8))
-            cursor.addRow(
-                arrayOf(
-                    contactId,
-                    Base64.encodeToString(encrypted.ciphertext, Base64.NO_WRAP),
-                    Base64.encodeToString(encrypted.iv, Base64.NO_WRAP),
-                ),
-            )
+            addProfileRow(cursor, contactId, profileJson)
         }
 
         return cursor
     }
 
     /**
-     * Returns a single contact profile, encrypted with AES-256-GCM.
+     * Returns a single contact profile as plaintext columns.
      *
      * @param contactId System contact identifier
      * @return Cursor with one row if profile exists, empty cursor otherwise
      */
     private fun querySingleProfile(contactId: Long): Cursor {
-        val cursor = MatrixCursor(
-            arrayOf(COLUMN_CONTACT_ID, COLUMN_ENCRYPTED_DATA, COLUMN_ENCRYPTED_IV),
-        )
+        val cursor = MatrixCursor(PROFILE_COLUMNS)
 
         val profileJson = profileStore.getProfile(contactId) ?: return cursor
+        addProfileRow(cursor, contactId, profileJson)
 
-        val encrypted = sessionCipher.encrypt(profileJson.toByteArray(Charsets.UTF_8))
+        return cursor
+    }
+
+    /**
+     * Deserializes a profile JSON string and adds a plaintext row to the cursor.
+     * List fields (top_ngrams, style_embedding) are serialized as CSV strings
+     * to match the flat cursor schema expected by [SmsProviderClient].
+     * Column order matches [PROFILE_COLUMNS].
+     */
+    private fun addProfileRow(cursor: MatrixCursor, contactId: Long, profileJson: String) {
+        val profile = json.decodeFromString<ContactProfile>(profileJson)
         cursor.addRow(
             arrayOf(
                 contactId,
-                Base64.encodeToString(encrypted.ciphertext, Base64.NO_WRAP),
-                Base64.encodeToString(encrypted.iv, Base64.NO_WRAP),
+                profile.dominantLanguage,
+                profile.tone,
+                profile.avgResponseLength,
+                profile.topNgrams.joinToString(","),
+                profile.styleEmbedding.joinToString(","),
             ),
         )
-
-        return cursor
     }
 
     // ── Security ──────────────────────────────────────────────────────
