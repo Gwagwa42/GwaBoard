@@ -26,6 +26,18 @@
                 android:resource="@xml/method" />
         </service>
 
+        <!-- Receives data deletion broadcasts from the companion app.
+             Not exported — only direct broadcasts via setPackage() are accepted.
+             Listens for GDPR deletion events to invalidate cached profiles. -->
+        <receiver
+            android:name=".privacy.DataDeletionReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="dev.gwaboard.action.DATA_DELETED_ALL" />
+                <action android:name="dev.gwaboard.action.DATA_DELETED_CONTACT" />
+            </intent-filter>
+        </receiver>
+
     </application>
 
 </manifest>

@@ -126,6 +126,32 @@ class NGramEngine(
         }
     }
 
+    /**
+     * Clears all user-learned n-grams from both the in-memory model and
+     * persistent storage. Static dictionary n-grams are preserved.
+     *
+     * Used for GDPR "clear learned words" functionality. After calling this,
+     * the engine continues to work with dictionary data only until new
+     * words are learned from typing.
+     */
+    suspend fun clearLearnedData() {
+        mutex.withLock {
+            model.clear()
+            Log.i(TAG, "In-memory n-gram model cleared")
+        }
+
+        storage?.let { store ->
+            try {
+                withContext(Dispatchers.IO) {
+                    store.deleteAll()
+                }
+                Log.i(TAG, "Persisted user n-grams deleted")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to delete persisted n-grams", e)
+            }
+        }
+    }
+
     override fun close() {
         storage?.close()
         Log.i(TAG, "NGramEngine closed")

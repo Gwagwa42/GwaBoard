@@ -47,6 +47,26 @@ object IpcContract {
         const val HASHED_ADDRESS = "hashed_address"
     }
 
+    /**
+     * Broadcast actions for GDPR data deletion coordination between apps.
+     * The companion app sends these broadcasts when user requests data erasure.
+     * The keyboard app listens and invalidates its in-memory caches accordingly.
+     */
+    object Actions {
+        /** Broadcast sent when all profile data has been deleted in the companion app */
+        const val DATA_DELETED_ALL = "dev.gwaboard.action.DATA_DELETED_ALL"
+
+        /** Broadcast sent when a single contact's profile has been deleted.
+         *  Includes extra [Extras.CONTACT_ADDRESS] identifying the removed contact. */
+        const val DATA_DELETED_CONTACT = "dev.gwaboard.action.DATA_DELETED_CONTACT"
+    }
+
+    /** Intent extras for data deletion broadcasts */
+    object Extras {
+        /** Contact phone address (String) included with [Actions.DATA_DELETED_CONTACT] */
+        const val CONTACT_ADDRESS = "dev.gwaboard.extra.CONTACT_ADDRESS"
+    }
+
     /** Column name constants for contact profiles */
     object ProfileColumns {
         const val DOMINANT_LANGUAGE = "dominant_language"

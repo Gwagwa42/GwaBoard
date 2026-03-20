@@ -41,11 +41,22 @@
     <string name="settings_reanalyze_frequency">Re-analyze Frequency</string>
     <string name="settings_profile_detail">Profile Detail Level</string>
     <string name="settings_delete_data">Delete All My Data</string>
-    <string name="settings_delete_data_description">Permanently remove all profiles and cached data. This action cannot be undone.</string>
+    <string name="settings_delete_data_description">Permanently remove all profiles and cached data. The keyboard app will also be notified to clear its caches. This action cannot be undone.</string>
     <string name="settings_delete_confirm_title">Delete All Data?</string>
-    <string name="settings_delete_confirm_message">This will permanently remove all profiles, analysis data, and cached content. This action cannot be undone.</string>
+    <string name="settings_delete_confirm_message">This will permanently remove all profiles, analysis data, and cached content. The keyboard app will also clear any cached profiles. This action cannot be undone.</string>
     <string name="settings_delete_confirm">Delete Everything</string>
     <string name="settings_cancel">Cancel</string>
+
+    <!-- Per-contact deletion -->
+    <string name="settings_per_contact_title">Per-Contact Data</string>
+    <string name="settings_per_contact_description">Remove a specific contact\'s analysis profile. The keyboard will be notified to clear any cached data for this contact.</string>
+    <string name="settings_delete_contact_format">Delete profile for %1$s</string>
+    <string name="settings_delete_contact_confirm_title">Delete Contact Profile?</string>
+    <string name="settings_delete_contact_confirm_message">This will permanently remove the analysis profile for %1$s. This action cannot be undone.</string>
+
+    <!-- Privacy information -->
+    <string name="settings_privacy_info_title">What Does This App Analyze?</string>
+    <string name="settings_privacy_info_body">GwaBoard Companion analyzes SMS conversation patterns to build statistical profiles per contact. It extracts:\n\n• Dominant language detection\n• Conversational tone (formal, casual, etc.)\n• Average response length\n• Frequently used word patterns (n-grams)\n\nNo raw message content is stored — only derived statistics. All processing happens entirely on your device. No data is ever sent to any server.</string>
 
     <!-- Navigation -->
     <string name="nav_dashboard">Dashboard</string>

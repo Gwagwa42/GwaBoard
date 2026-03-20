@@ -104,9 +104,40 @@ class NGramStorage(
         return deleted
     }
 
+    /**
+     * Deletes all user-learned n-grams from the database.
+     * Used for GDPR "clear learned words" functionality.
+     *
+     * @return Number of entries removed.
+     */
+    fun deleteAll(): Int {
+        val deleted = writableDatabase.delete("ngrams", null, null)
+        Log.i(TAG, "Deleted all $deleted n-gram entries (user data reset)")
+        return deleted
+    }
+
+    /**
+     * Returns the total count of stored n-gram entries.
+     * Used by the privacy dashboard to show data inventory.
+     */
+    fun entryCount(): Int {
+        return readableDatabase.rawQuery("SELECT COUNT(*) FROM ngrams", null).use { cursor ->
+            if (cursor.moveToFirst()) cursor.getInt(0) else 0
+        }
+    }
+
+    /**
+     * Returns the database file size in bytes.
+     * Used by the privacy dashboard to show storage usage.
+     */
+    fun databaseSizeBytes(context: android.content.Context): Long {
+        val dbFile = context.getDatabasePath(DATABASE_NAME)
+        return if (dbFile.exists()) dbFile.length() else 0L
+    }
+
     companion object {
         private const val TAG = "NGramStorage"
-        private const val DATABASE_NAME = "ngrams.db"
+        internal const val DATABASE_NAME = "ngrams.db"
         private const val DATABASE_VERSION = 1
     }
 }
