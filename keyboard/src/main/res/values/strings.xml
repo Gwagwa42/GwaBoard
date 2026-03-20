@@ -3,4 +3,36 @@
     <string name="app_name">GwaBoard</string>
     <string name="subtype_fr_azerty">Francais (AZERTY)</string>
     <string name="subtype_en_qwerty">English (QWERTY)</string>
+
+    <!-- Privacy Dashboard -->
+    <string name="privacy_dashboard_title">Privacy Dashboard</string>
+    <string name="privacy_dashboard_subtitle">See exactly what data GwaBoard stores on your device. All processing is 100%% on-device — nothing is sent to any server.</string>
+
+    <!-- Data inventory -->
+    <string name="privacy_section_data_stored">Data Stored On Device</string>
+    <string name="privacy_learned_words">Learned word patterns</string>
+    <string name="privacy_storage_used">Storage used</string>
+    <string name="privacy_companion_status">Companion app</string>
+    <string name="privacy_companion_connected">Connected</string>
+    <string name="privacy_companion_not_connected">Not connected</string>
+    <string name="privacy_data_explanation">The keyboard learns from your typing to improve suggestions. Only word frequency patterns are stored — never passwords, credit card numbers, or content from sensitive fields.</string>
+
+    <!-- AI controls -->
+    <string name="privacy_section_ai_controls">AI Suggestions</string>
+    <string name="privacy_ai_suggestions">Enable AI suggestions</string>
+    <string name="privacy_ai_suggestions_description">When disabled, only standard word predictions are shown. The on-device language model is unloaded to free memory.</string>
+    <string name="privacy_llm_loaded">Language model is currently loaded in memory (~400 MB)</string>
+
+    <!-- Data deletion -->
+    <string name="privacy_section_data_deletion">Data Deletion</string>
+    <string name="privacy_clear_words_description">Permanently delete all word patterns learned from your typing. Dictionary suggestions will still work, but personalized predictions will be reset.</string>
+    <string name="privacy_clear_learned_words">Clear Learned Words</string>
+    <string name="privacy_clear_confirm_title">Clear Learned Words?</string>
+    <string name="privacy_clear_confirm_message">This will permanently delete all word patterns learned from your typing. Personalized predictions will be reset. This action cannot be undone.</string>
+    <string name="privacy_clear_confirm">Clear All</string>
+    <string name="privacy_cancel">Cancel</string>
+
+    <!-- Privacy policy summary -->
+    <string name="privacy_section_about">About Your Privacy</string>
+    <string name="privacy_policy_summary">GwaBoard is designed with privacy as a core principle:\n\n• All AI inference runs 100%% on your device\n• The keyboard has zero internet permission\n• No SMS, contacts, or personal data is accessed by the keyboard directly\n• Word patterns are learned only from non-sensitive input fields\n• The companion app (if installed) shares only statistical profiles — never raw messages\n• You can delete all learned data at any time from this screen</string>
 </resources>

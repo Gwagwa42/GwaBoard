@@ -60,6 +60,15 @@ class HybridSuggestionEngine(
     @Volatile
     private var tier2EverTriggered = false
 
+    /**
+     * Whether AI suggestions (Tier 2) are enabled. When disabled, only Tier 1 (n-gram)
+     * suggestions are returned, effectively falling back to standard NLP behavior.
+     * Controlled by the user via the privacy settings "Disable AI suggestions" toggle.
+     */
+    @Volatile
+    var isAiEnabled: Boolean = true
+        private set
+
     /** Active inactivity unload job, cancelled and relaunched on each Tier 2 usage. */
     @Volatile
     private var unloadJob: Job? = null
@@ -111,8 +120,9 @@ class HybridSuggestionEngine(
         val tier1Results = tier1Deferred.await()
         onTier1Ready(tier1Results)
 
-        // Tier 2 runs only if the engine is available
+        // Tier 2 runs only if the engine is available and AI is enabled
         val engine = smolLMEngine ?: return@coroutineScope
+        if (!isAiEnabled) return@coroutineScope
         ensureTier2Loaded(engine)
 
         val tier2Results = withTimeoutOrNull(TIER2_TIMEOUT_MS) {
@@ -160,6 +170,40 @@ class HybridSuggestionEngine(
 
     /** Returns true if Tier 2 is currently loaded in memory. */
     fun isTier2Loaded(): Boolean = smolLMEngine?.isLoaded == true
+
+    /**
+     * Enables or disables AI (Tier 2) suggestions. When disabled, only Tier 1
+     * n-gram suggestions are returned and the LLM model is unloaded to free memory.
+     * This is the runtime toggle for the "Disable AI suggestions" privacy control.
+     */
+    suspend fun setAiEnabled(enabled: Boolean) {
+        isAiEnabled = enabled
+        Log.i(TAG, "AI suggestions ${if (enabled) "enabled" else "disabled"}")
+
+        if (!enabled) {
+            // Unload the LLM model to free ~400MB RAM
+            smolLMEngine?.let { engine ->
+                tier2LifecycleMutex.withLock {
+                    if (engine.isLoaded) {
+                        engine.unload()
+                        Log.i(TAG, "Tier 2 engine unloaded (AI disabled by user)")
+                    }
+                }
+            }
+            clearSmsContext()
+            contactProfile = null
+        }
+    }
+
+    /**
+     * Clears all user-learned data from the n-gram engine.
+     * Delegates to [NGramEngine.clearLearnedData] which purges both
+     * in-memory and persisted n-gram entries.
+     */
+    suspend fun clearLearnedData() {
+        ngramEngine.clearLearnedData()
+        Log.i(TAG, "Learned word data cleared")
+    }
 
     override suspend fun learn(
         precedingWords: List<String>,

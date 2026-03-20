@@ -1,0 +1,22 @@
+GwaBoard Companion provides secure SMS context to the GwaBoard Keyboard.
+
+This app reads your SMS messages and builds a local user profile
+(language preferences, tone patterns) that the keyboard uses to
+generate more relevant suggestions — all without any network access.
+
+Key features:
+- SMS reading and context extraction for AI-powered suggestions
+- Local profile building with language detection and tone analysis
+- Secure IPC via signature-protected ContentProvider
+- AES-256-GCM encrypted data transfer to the keyboard
+- Dashboard to view and manage your profile data
+- Full control over permissions and data sharing
+
+Privacy guarantees:
+- No internet permission — your data never leaves your device
+- Profile data is stored locally and encrypted
+- IPC is signature-verified: only the matching GwaBoard Keyboard
+  APK (signed with the same key) can access your data
+
+This app is part of the GwaBoard dual-app architecture.
+Install GwaBoard Keyboard separately for the AI keyboard.

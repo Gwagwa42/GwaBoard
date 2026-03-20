@@ -1,0 +1,1 @@
+Secure SMS context provider for GwaBoard Keyboard

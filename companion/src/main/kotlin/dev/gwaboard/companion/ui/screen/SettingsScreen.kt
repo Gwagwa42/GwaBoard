@@ -60,7 +60,9 @@ enum class ProfileDetailLevel(val label: String) {
  * Provides controls for:
  * - Re-analyze frequency: how often SMS history is rescanned
  * - Profile detail level: depth of per-contact analysis
+ * - Per-contact profile deletion: remove a specific contact's data
  * - Data deletion: permanent removal of all profiles and cached data
+ * - Privacy information: explanation of what data the companion analyzes
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -70,9 +72,12 @@ fun SettingsScreen(
     profileDetailLevel: ProfileDetailLevel,
     onProfileDetailLevelChanged: (ProfileDetailLevel) -> Unit,
     onDeleteAllData: () -> Unit,
+    contactAddresses: List<String> = emptyList(),
+    onDeleteContactData: (String) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
+    var showContactDeleteDialog by remember { mutableStateOf<String?>(null) }
 
     Column(
         modifier = modifier
@@ -112,9 +117,52 @@ fun SettingsScreen(
             onSelected = onProfileDetailLevelChanged,
         )
 
-        Spacer(modifier = Modifier.height(48.dp))
+        Spacer(modifier = Modifier.height(32.dp))
 
-        // GDPR delete all data
+        // ── Per-contact deletion ────────────────────────────────────
+        if (contactAddresses.isNotEmpty()) {
+            Text(
+                text = stringResource(R.string.settings_per_contact_title),
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = stringResource(R.string.settings_per_contact_description),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            contactAddresses.forEach { address ->
+                OutlinedButton(
+                    onClick = { showContactDeleteDialog = address },
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(text = stringResource(R.string.settings_delete_contact_format, address))
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+        }
+
+        // ── Privacy information ─────────────────────────────────────
+        Text(
+            text = stringResource(R.string.settings_privacy_info_title),
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = stringResource(R.string.settings_privacy_info_body),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // ── GDPR delete all data ────────────────────────────────────
         Text(
             text = stringResource(R.string.settings_delete_data_description),
             style = MaterialTheme.typography.bodySmall,
@@ -141,6 +189,17 @@ fun SettingsScreen(
             onDismiss = { showDeleteDialog = false },
         )
     }
+
+    showContactDeleteDialog?.let { address ->
+        ContactDeleteConfirmationDialog(
+            contactAddress = address,
+            onConfirm = {
+                showContactDeleteDialog = null
+                onDeleteContactData(address)
+            },
+            onDismiss = { showContactDeleteDialog = null },
+        )
+    }
 }
 
 @Composable
@@ -152,6 +211,41 @@ private fun DeleteConfirmationDialog(
         onDismissRequest = onDismiss,
         title = { Text(text = stringResource(R.string.settings_delete_confirm_title)) },
         text = { Text(text = stringResource(R.string.settings_delete_confirm_message)) },
+        confirmButton = {
+            Button(
+                onClick = onConfirm,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.error,
+                ),
+            ) {
+                Text(text = stringResource(R.string.settings_delete_confirm))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(text = stringResource(R.string.settings_cancel))
+            }
+        },
+    )
+}
+
+@Composable
+private fun ContactDeleteConfirmationDialog(
+    contactAddress: String,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = stringResource(R.string.settings_delete_contact_confirm_title)) },
+        text = {
+            Text(
+                text = stringResource(
+                    R.string.settings_delete_contact_confirm_message,
+                    contactAddress,
+                ),
+            )
+        },
         confirmButton = {
             Button(
                 onClick = onConfirm,
