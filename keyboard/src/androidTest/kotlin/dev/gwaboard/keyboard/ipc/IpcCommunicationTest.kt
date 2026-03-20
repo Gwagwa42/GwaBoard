@@ -139,8 +139,7 @@ class IpcCommunicationTest {
     fun contentProvider_columns_matchPlaintextSchema() {
         // Validates that SmsContentProvider returns plaintext columns
         // matching IpcContract.ProfileColumns, which SmsProviderClient
-        // reads directly. Encryption was removed because Android Keystore
-        // keys are UID-bound (see issue #51).
+        // reads directly. Encryption was removed (see issues #50, #51).
 
         val cursor = contentResolver.query(
             SmsProviderContract.CONTACT_PROFILES_URI,
@@ -152,7 +151,7 @@ class IpcCommunicationTest {
 
             // Columns expected by SmsProviderClient (plaintext schema)
             val expectedColumns = setOf(
-                IpcContract.ContactColumns.CONTACT_ID,
+                IpcContract.ProfileColumns.CONTACT_ID,
                 IpcContract.ProfileColumns.DOMINANT_LANGUAGE,
                 IpcContract.ProfileColumns.TONE,
                 IpcContract.ProfileColumns.AVG_RESPONSE_LENGTH,
@@ -293,7 +292,7 @@ class IpcCommunicationTest {
     }
 
     @Test
-    fun contentProvider_afterSeeding_singleProfileHasEncryptedData() {
+    fun contentProvider_afterSeeding_singleProfileHasPlaintextData() {
         // Seed via call()
         contentResolver.call(
             Uri.parse(IpcContract.BASE_URI),
@@ -319,27 +318,26 @@ class IpcCommunicationTest {
 
             assertTrue("Cursor should move to first row", c.moveToFirst())
 
-            // Verify encrypted columns are present and non-empty
-            val encryptedData = c.getString(
-                c.getColumnIndexOrThrow("encrypted_data"),
+            // Verify plaintext columns are present and non-empty
+            val language = c.getString(
+                c.getColumnIndexOrThrow(IpcContract.ProfileColumns.DOMINANT_LANGUAGE),
             )
-            val encryptedIv = c.getString(
-                c.getColumnIndexOrThrow("encrypted_iv"),
-            )
-
-            assertNotNull("encrypted_data should not be null", encryptedData)
-            assertNotNull("encrypted_iv should not be null", encryptedIv)
-            assertTrue(
-                "encrypted_data should be non-empty Base64",
-                encryptedData.isNotEmpty(),
-            )
-            assertTrue(
-                "encrypted_iv should be non-empty Base64",
-                encryptedIv.isNotEmpty(),
+            val tone = c.getString(
+                c.getColumnIndexOrThrow(IpcContract.ProfileColumns.TONE),
             )
 
-            Log.i(TAG, "Seeded profile encrypted_data length: ${encryptedData.length}")
-            Log.i(TAG, "Seeded profile encrypted_iv length: ${encryptedIv.length}")
+            assertNotNull("dominant_language should not be null", language)
+            assertNotNull("tone should not be null", tone)
+            assertTrue(
+                "dominant_language should be non-empty",
+                language.isNotEmpty(),
+            )
+            assertTrue(
+                "tone should be non-empty",
+                tone.isNotEmpty(),
+            )
+
+            Log.i(TAG, "Seeded profile language: $language, tone: $tone")
         }
     }
 

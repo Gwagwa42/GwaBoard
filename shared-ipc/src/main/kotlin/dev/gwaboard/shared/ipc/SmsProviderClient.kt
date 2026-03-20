@@ -88,7 +88,7 @@ class SmsProviderClient(
     fun queryContactProfile(contactId: Long): ContactProfile? {
         if (!isCompanionAvailable) return null
 
-        val selection = "${IpcContract.ContactColumns.CONTACT_ID} = ?"
+        val selection = "${IpcContract.ProfileColumns.CONTACT_ID} = ?"
         val selectionArgs = arrayOf(contactId.toString())
 
         val results = safeQuery(

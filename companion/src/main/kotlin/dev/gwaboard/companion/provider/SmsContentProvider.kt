@@ -33,7 +33,7 @@ import dev.gwaboard.shared.models.IpcContract
  * are UID-bound — two apps with different UIDs cannot share the same key, causing
  * AEADBadTagException on decryption. The two layers above (OS signature permission
  * + runtime certificate verification) provide sufficient protection for local IPC.
- * See issue #51 for the full threat model analysis.
+ * See issues #50 and #51 for the full analysis.
  *
  * ## Supported URI patterns
  *
@@ -50,7 +50,7 @@ class SmsContentProvider : ContentProvider() {
         private const val PROFILES_BY_CONTACT = 2
 
         /** Column name for the contact ID */
-        const val COLUMN_CONTACT_ID = IpcContract.ContactColumns.CONTACT_ID
+        const val COLUMN_CONTACT_ID = IpcContract.ProfileColumns.CONTACT_ID
 
         /**
          * Cursor column names for profile query results, matching [IpcContract.ProfileColumns].
