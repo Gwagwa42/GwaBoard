@@ -2,6 +2,7 @@ package dev.gwaboard.keyboard.ipc
 
 import android.content.ContentResolver
 import android.net.Uri
+import android.os.Bundle
 import android.util.Log
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -9,6 +10,7 @@ import dev.gwaboard.shared.ipc.SignatureVerifier
 import dev.gwaboard.shared.ipc.SmsProviderClient
 import dev.gwaboard.shared.ipc.SmsProviderContract
 import dev.gwaboard.shared.models.IpcContract
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
@@ -240,5 +242,153 @@ class IpcCommunicationTest {
             "Contacts query should return empty list (URI not handled)",
             contacts.isEmpty(),
         )
+    }
+
+    // ── Layer 5: Debug Seeding via call() ──────────────────────────────
+
+    @Test
+    fun contentProvider_callSeedTestData_returnsSuccess() {
+        // Seed test data via the debug call() endpoint
+        val result = contentResolver.call(
+            Uri.parse(IpcContract.BASE_URI),
+            "seed_test_data",
+            null,
+            null,
+        )
+
+        assertNotNull("seed_test_data should return a non-null Bundle", result)
+        assertTrue(
+            "seed_test_data should return success=true",
+            result!!.getBoolean("success", false),
+        )
+    }
+
+    @Test
+    fun contentProvider_callClearTestData_returnsSuccess() {
+        // Clear test data via the debug call() endpoint
+        val result = contentResolver.call(
+            Uri.parse(IpcContract.BASE_URI),
+            "clear_test_data",
+            null,
+            null,
+        )
+
+        assertNotNull("clear_test_data should return a non-null Bundle", result)
+        assertTrue(
+            "clear_test_data should return success=true",
+            result!!.getBoolean("success", false),
+        )
+    }
+
+    // ── Layer 6: Seeded Data Verification ──────────────────────────────
+
+    @Test
+    fun contentProvider_afterSeeding_returnsNonEmptyCursor() {
+        // Seed first via call()
+        contentResolver.call(
+            Uri.parse(IpcContract.BASE_URI),
+            "seed_test_data",
+            null,
+            null,
+        )
+
+        // Query all profiles — should now have at least one row
+        val cursor = contentResolver.query(
+            SmsProviderContract.CONTACT_PROFILES_URI,
+            null, null, null, null,
+        )
+
+        assertNotNull("Cursor should not be null after seeding", cursor)
+        cursor!!.use { c ->
+            Log.i(TAG, "After seeding: cursor has ${c.count} rows")
+            assertTrue(
+                "Cursor should contain at least 1 row after seeding",
+                c.count > 0,
+            )
+        }
+    }
+
+    @Test
+    fun contentProvider_afterSeeding_singleProfileHasEncryptedData() {
+        // Seed via call()
+        contentResolver.call(
+            Uri.parse(IpcContract.BASE_URI),
+            "seed_test_data",
+            null,
+            null,
+        )
+
+        // Query the specific seeded profile (contactId=1)
+        val uri = Uri.withAppendedPath(
+            SmsProviderContract.CONTACT_PROFILES_URI,
+            "1",
+        )
+        val cursor = contentResolver.query(uri, null, null, null, null)
+
+        assertNotNull("Single profile cursor should not be null", cursor)
+        cursor!!.use { c ->
+            assertEquals(
+                "Seeded profile for contactId=1 should return exactly 1 row",
+                1,
+                c.count,
+            )
+
+            assertTrue("Cursor should move to first row", c.moveToFirst())
+
+            // Verify encrypted columns are present and non-empty
+            val encryptedData = c.getString(
+                c.getColumnIndexOrThrow("encrypted_data"),
+            )
+            val encryptedIv = c.getString(
+                c.getColumnIndexOrThrow("encrypted_iv"),
+            )
+
+            assertNotNull("encrypted_data should not be null", encryptedData)
+            assertNotNull("encrypted_iv should not be null", encryptedIv)
+            assertTrue(
+                "encrypted_data should be non-empty Base64",
+                encryptedData.isNotEmpty(),
+            )
+            assertTrue(
+                "encrypted_iv should be non-empty Base64",
+                encryptedIv.isNotEmpty(),
+            )
+
+            Log.i(TAG, "Seeded profile encrypted_data length: ${encryptedData.length}")
+            Log.i(TAG, "Seeded profile encrypted_iv length: ${encryptedIv.length}")
+        }
+    }
+
+    @Test
+    fun contentProvider_afterClear_returnsEmptyCursor() {
+        // Seed then clear
+        contentResolver.call(
+            Uri.parse(IpcContract.BASE_URI),
+            "seed_test_data",
+            null,
+            null,
+        )
+        contentResolver.call(
+            Uri.parse(IpcContract.BASE_URI),
+            "clear_test_data",
+            null,
+            null,
+        )
+
+        // Query the cleared profile — should be empty
+        val uri = Uri.withAppendedPath(
+            SmsProviderContract.CONTACT_PROFILES_URI,
+            "1",
+        )
+        val cursor = contentResolver.query(uri, null, null, null, null)
+
+        assertNotNull("Cursor should not be null after clear", cursor)
+        cursor!!.use { c ->
+            assertEquals(
+                "Cursor should be empty after clearing test data",
+                0,
+                c.count,
+            )
+        }
     }
 }

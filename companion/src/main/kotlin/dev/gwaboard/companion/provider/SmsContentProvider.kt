@@ -9,9 +9,12 @@ import android.net.Uri
 import android.os.Bundle
 import android.util.Base64
 import android.util.Log
+import dev.gwaboard.companion.BuildConfig
+import dev.gwaboard.companion.CompanionApplication
 import dev.gwaboard.shared.crypto.EncryptedPayload
 import dev.gwaboard.shared.crypto.SessionCipher
 import dev.gwaboard.shared.ipc.SignatureVerifier
+import dev.gwaboard.shared.models.ContactProfile
 import dev.gwaboard.shared.models.IpcContract
 
 /**
@@ -65,15 +68,64 @@ class SmsContentProvider : ContentProvider() {
     private lateinit var sessionCipher: SessionCipher
 
     /**
-     * In-memory profile store. In a real implementation, this would be backed
-     * by a Room database or similar persistent storage populated by the
-     * companion app's SMS analysis pipeline.
+     * Shared profile store, initialized by [CompanionApplication].
+     *
+     * In a real implementation, this would be backed by a Room database
+     * populated by the companion app's SMS analysis pipeline.
+     * For now, the Application seeds it with debug data on startup.
      */
-    private val profileStore = ProfileStore()
+    private val profileStore: ProfileStore
+        get() = CompanionApplication.profileStore
 
     override fun onCreate(): Boolean {
         sessionCipher = SessionCipher()
         return true
+    }
+
+    /**
+     * Debug-only endpoint for seeding test data from the keyboard's
+     * instrumented tests via `ContentResolver.call()`.
+     *
+     * Supported methods:
+     * - `seed_test_data`: Inserts a known test profile (contactId=1).
+     *   Returns a Bundle with `"success" = true` on success.
+     * - `clear_test_data`: Removes all profiles from the store.
+     *   Returns a Bundle with `"success" = true` on success.
+     *
+     * Returns `null` in release builds — this endpoint is disabled entirely.
+     */
+    override fun call(method: String, arg: String?, extras: Bundle?): Bundle? {
+        if (!BuildConfig.DEBUG) return null
+
+        return when (method) {
+            "seed_test_data" -> {
+                profileStore.putProfile(
+                    1L,
+                    ContactProfile(
+                        dominantLanguage = "fr",
+                        tone = "casual",
+                        avgResponseLength = 42,
+                        topNgrams = listOf("salut", "ok", "merci"),
+                        styleEmbedding = listOf(0.1f, 0.2f, 0.3f),
+                    ),
+                )
+                Log.i(TAG, "Debug: test data seeded via call()")
+                Bundle().apply { putBoolean("success", true) }
+            }
+
+            "clear_test_data" -> {
+                // Clear all profiles by removing known test IDs
+                profileStore.removeProfile(1L)
+                profileStore.removeProfile(2L)
+                Log.i(TAG, "Debug: test data cleared via call()")
+                Bundle().apply { putBoolean("success", true) }
+            }
+
+            else -> {
+                Log.w(TAG, "Unknown call method: $method")
+                null
+            }
+        }
     }
 
     override fun query(
