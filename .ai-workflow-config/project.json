@@ -1,0 +1,65 @@
+{
+  "version": "2.1.0",
+  "project_name": "GwaBoard",
+  "modules": {},
+  "build": {
+    "tool": "unknown",
+    "command": "",
+    "unit_test_task": null,
+    "self_test_task": null,
+    "all_tests_task": null,
+    "lint_task": null
+  },
+  "module_dependencies": {},
+  "shared_modules": [],
+  "default_module": null,
+  "patterns": {
+    "migration": "",
+    "migration_naming": "",
+    "security": ["security/", "auth/", ".env", ".key", ".pem"]
+  },
+  "hooks": {
+    "detect_module": null,
+    "run_tests": null,
+    "validate_migration": null,
+    "post_pr": null
+  },
+  "stack": {
+    "languages": [
+  "python"
+],
+    "frameworks": [],
+    "orm": null,
+    "di": null,
+    "architecture": null,
+    "key_patterns": [],
+    "security": {
+      "auth": null,
+      "rate_limits": null,
+      "protections": []
+    },
+    "planned": {
+    "_source": "issue-stack-analyzer",
+    "_analyzed_at": "2026-03-20",
+    "_issue_count": 20,
+    "_milestone_count": 9,
+    "languages": [
+  "kotlin"
+],
+    "frameworks": [
+  "sqlite"
+],
+    "orm": null,
+    "di": null,
+    "architecture": null,
+    "signals": [{"tech":"sqlite","source":"issue:20,issue:9","confidence":"medium"},{"tech":"kotlin","source":"issue:4,issue:11,issue:2,milestone:2","confidence":"high"}]
+  }
+  },
+  "council": {
+    "experts": ["arch-reviewer", "sec-reviewer", "perf-reviewer", "api-reviewer", "data-reviewer"],
+    "context_overrides": {}
+  },
+  "module_agents": {},
+  "context_profiles": {},
+  "agent_context_overrides": {}
+}
