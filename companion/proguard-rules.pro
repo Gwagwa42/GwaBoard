@@ -1,17 +1,8 @@
-# GwaBoard Keyboard — ProGuard / R8 rules
+# GwaBoard Companion — ProGuard / R8 rules
 
-# ── IME Service ──
-# Keep the IME service class (referenced by name in AndroidManifest.xml)
--keep class dev.gwaboard.keyboard.GwaBoardImeService { *; }
-
-# ── llama.cpp JNI ──
-# Keep all native methods in the JNI bridge (called from C++ via JNI)
--keep class dev.gwaboard.keyboard.llm.LlamaCppBridge {
-    native <methods>;
-    public *;
-}
-# Keep companion object for library loading
--keep class dev.gwaboard.keyboard.llm.LlamaCppBridge$Companion { *; }
+# ── ContentProvider ──
+# Keep the ContentProvider (referenced by name in AndroidManifest.xml)
+-keep class dev.gwaboard.companion.provider.SmsContentProvider { *; }
 
 # ── kotlinx.serialization ──
 # Keep serializable classes and their serializers
@@ -32,7 +23,7 @@
 }
 
 # ── ContentProvider IPC classes ──
-# Keep IPC contract and provider client (used via reflection in ContentResolver)
+# Keep IPC contract and signature verifier (used in provider registration)
 -keep class dev.gwaboard.shared.ipc.SmsProviderContract { *; }
 -keep class dev.gwaboard.shared.ipc.SmsProviderClient { *; }
 -keep class dev.gwaboard.shared.ipc.SignatureVerifier { *; }

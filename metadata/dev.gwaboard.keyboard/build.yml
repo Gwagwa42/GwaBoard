@@ -1,0 +1,35 @@
+# F-Droid build metadata for GwaBoard Keyboard
+# https://f-droid.org/docs/Build_Metadata_Reference/
+
+Categories:
+  - System
+  - Writing
+
+License: GPL-3.0-only
+
+AuthorName: GwaBoard Contributors
+SourceCode: https://github.com/Gwagwa42/GwaBoard
+IssueTracker: https://github.com/Gwagwa42/GwaBoard/issues
+
+AutoName: GwaBoard Keyboard
+
+RepoType: git
+Repo: https://github.com/Gwagwa42/GwaBoard.git
+
+Builds:
+  - versionName: 0.1.0
+    versionCode: 1
+    commit: v0.1.0
+    subdir: keyboard
+    gradle:
+      - yes
+    ndk: r27c
+    scanignore:
+      - keyboard/src/main/cpp/llama.cpp
+    scandelete:
+      - florisboard
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 0.1.0
+CurrentVersionCode: 1

@@ -1,0 +1,20 @@
+GwaBoard Keyboard is a privacy-first AI keyboard for Android.
+
+All AI inference runs 100% on-device using a hybrid two-tier engine:
+- Tier 1: N-gram model for instant keystroke predictions (<10ms)
+- Tier 2: SmolLM2-360M via llama.cpp for context-aware suggestions
+
+Key features:
+- Zero network permissions — no data ever leaves your device
+- Smart SMS context integration via companion app
+- Expandable suggestion bar with Compose UI
+- Sensitive field detection to automatically disable AI features
+- Optimized for Tensor G3 (ARMv9) with ARMv8 compatibility
+
+GwaBoard Keyboard requires the BIND_INPUT_METHOD permission only.
+It never accesses SMS, internet, or contacts directly.
+SMS context is provided securely by the companion app via
+signature-protected IPC with AES-256-GCM encryption.
+
+This app is part of the GwaBoard dual-app architecture.
+Install GwaBoard Companion separately for SMS context features.
