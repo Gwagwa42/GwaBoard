@@ -19,6 +19,11 @@ android {
 }
 
 dependencies {
+    // Shared modules for IPC contract, crypto, and data models
+    implementation(project(":shared-models"))
+    implementation(project(":shared-ipc"))
+    implementation(project(":shared-crypto"))
+
     // AndroidX Core
     implementation(libs.androidx.core.ktx)
 
@@ -44,16 +49,14 @@ dependencies {
     // Coroutines
     implementation(libs.bundles.coroutines)
 
-    // Testing
-    testImplementation(libs.bundles.testing)
-    androidTestImplementation(libs.bundles.testing.android)
-}
-
-    // Shared modules for IPC contract, crypto, and data models
-    implementation(project(":shared-models"))
-    implementation(project(":shared-ipc"))
-    implementation(project(":shared-crypto"))
-
     // Kotlinx Serialization for profile JSON encoding
     implementation(libs.kotlinx.serialization.json)
+
+    // Testing
+    testImplementation(libs.bundles.testing)
+    testImplementation(libs.junit5.api)
+    testRuntimeOnly(libs.junit5.engine)
+    testImplementation(libs.mockk)
+    testImplementation(libs.kotlinx.coroutines.test)
+    androidTestImplementation(libs.bundles.testing.android)
 }
