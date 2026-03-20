@@ -1,6 +1,7 @@
 plugins {
     id("AndroidAppConventions")
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -46,4 +47,13 @@ dependencies {
     // Testing
     testImplementation(libs.bundles.testing)
     androidTestImplementation(libs.bundles.testing.android)
+}
+
+    // Shared modules for IPC contract, crypto, and data models
+    implementation(project(":shared-models"))
+    implementation(project(":shared-ipc"))
+    implementation(project(":shared-crypto"))
+
+    // Kotlinx Serialization for profile JSON encoding
+    implementation(libs.kotlinx.serialization.json)
 }
