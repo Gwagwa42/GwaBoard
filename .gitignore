@@ -1,0 +1,6 @@
+
+# AI Pipeline — runtime state (gitignored)
+.ai-pipeline-data/
+
+# AI Pipeline — local config overrides
+.ai-workflow-config/project.json.local
