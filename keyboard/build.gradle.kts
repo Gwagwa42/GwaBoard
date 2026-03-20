@@ -6,10 +6,34 @@ plugins {
 android {
     namespace = "dev.gwaboard.keyboard"
 
+    ndkVersion = libs.versions.ndk.get()
+
     defaultConfig {
         applicationId = "dev.gwaboard.keyboard"
         versionCode = 1
         versionName = "0.1.0"
+
+        // NDK/CMake configuration for llama.cpp native build
+        externalNativeBuild {
+            cmake {
+                // Optimize for Tensor G3 (ARMv9) while keeping ARMv8 compatibility
+                arguments("-DANDROID_STL=c++_shared")
+                cppFlags("-std=c++17", "-O3")
+                abiFilters("arm64-v8a")
+            }
+        }
+
+        ndk {
+            abiFilters += "arm64-v8a"
+        }
+    }
+
+    // Point to the CMakeLists.txt that builds llama.cpp + JNI bridge
+    externalNativeBuild {
+        cmake {
+            version = libs.versions.cmake.get()
+            path = file("src/main/cpp/CMakeLists.txt")
+        }
     }
 
     buildFeatures {
@@ -19,6 +43,9 @@ android {
     testOptions {
         unitTests {
             isReturnDefaultValues = true
+            all {
+                it.forkEvery = 1
+            }
         }
     }
 }
