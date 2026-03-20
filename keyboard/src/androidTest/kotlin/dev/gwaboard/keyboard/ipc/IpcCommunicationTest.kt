@@ -2,6 +2,7 @@ package dev.gwaboard.keyboard.ipc
 
 import android.content.ContentResolver
 import android.net.Uri
+import android.os.Bundle
 import android.util.Log
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -9,6 +10,7 @@ import dev.gwaboard.shared.ipc.SignatureVerifier
 import dev.gwaboard.shared.ipc.SmsProviderClient
 import dev.gwaboard.shared.ipc.SmsProviderContract
 import dev.gwaboard.shared.models.IpcContract
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
@@ -134,9 +136,10 @@ class IpcCommunicationTest {
     // ── Layer 3: Column Schema Validation ────────────────────────────
 
     @Test
-    fun contentProvider_columns_matchExpectedSchema() {
-        // Diagnoses the column mismatch bug: SmsContentProvider returns
-        // encrypted columns, but SmsProviderClient expects plaintext columns.
+    fun contentProvider_columns_matchPlaintextSchema() {
+        // Validates that SmsContentProvider returns plaintext columns
+        // matching IpcContract.ProfileColumns, which SmsProviderClient
+        // reads directly. Encryption was removed (see issues #50, #51).
 
         val cursor = contentResolver.query(
             SmsProviderContract.CONTACT_PROFILES_URI,
@@ -146,11 +149,9 @@ class IpcCommunicationTest {
         cursor.use { c ->
             val actualColumns = c.columnNames.toSet()
 
-            // Columns returned by SmsContentProvider (encrypted schema)
-            val encryptedColumns = setOf("contact_id", "encrypted_data", "encrypted_iv")
-
             // Columns expected by SmsProviderClient (plaintext schema)
-            val plaintextColumns = setOf(
+            val expectedColumns = setOf(
+                IpcContract.ProfileColumns.CONTACT_ID,
                 IpcContract.ProfileColumns.DOMINANT_LANGUAGE,
                 IpcContract.ProfileColumns.TONE,
                 IpcContract.ProfileColumns.AVG_RESPONSE_LENGTH,
@@ -158,29 +159,13 @@ class IpcCommunicationTest {
                 IpcContract.ProfileColumns.STYLE_EMBEDDING,
             )
 
-            Log.w(TAG, "=== COLUMN SCHEMA DIAGNOSTIC ===")
-            Log.w(TAG, "Actual columns from provider: $actualColumns")
-            Log.w(TAG, "Encrypted columns (provider sends): $encryptedColumns")
-            Log.w(TAG, "Plaintext columns (client expects): $plaintextColumns")
+            Log.i(TAG, "=== COLUMN SCHEMA VALIDATION ===")
+            Log.i(TAG, "Actual columns from provider: $actualColumns")
+            Log.i(TAG, "Expected plaintext columns: $expectedColumns")
 
-            val hasEncryptedSchema = actualColumns.containsAll(encryptedColumns)
-            val hasPlaintextSchema = actualColumns.containsAll(plaintextColumns)
-
-            if (hasEncryptedSchema && !hasPlaintextSchema) {
-                Log.e(
-                    TAG,
-                    "BUG CONFIRMED: Provider returns encrypted columns but " +
-                        "client expects plaintext columns. SmsProviderClient needs " +
-                        "a decryption layer.",
-                )
-            }
-
-            // This assertion documents the current (broken) state.
-            // When the bug is fixed, change this to assert plaintext or
-            // encrypted+decryption columns as appropriate.
             assertTrue(
-                "Provider should return encrypted columns (current schema)",
-                hasEncryptedSchema,
+                "Provider should return plaintext profile columns matching IpcContract.ProfileColumns",
+                actualColumns.containsAll(expectedColumns),
             )
         }
     }
@@ -240,5 +225,152 @@ class IpcCommunicationTest {
             "Contacts query should return empty list (URI not handled)",
             contacts.isEmpty(),
         )
+    }
+
+    // ── Layer 5: Debug Seeding via call() ──────────────────────────────
+
+    @Test
+    fun contentProvider_callSeedTestData_returnsSuccess() {
+        // Seed test data via the debug call() endpoint
+        val result = contentResolver.call(
+            Uri.parse(IpcContract.BASE_URI),
+            "seed_test_data",
+            null,
+            null,
+        )
+
+        assertNotNull("seed_test_data should return a non-null Bundle", result)
+        assertTrue(
+            "seed_test_data should return success=true",
+            result!!.getBoolean("success", false),
+        )
+    }
+
+    @Test
+    fun contentProvider_callClearTestData_returnsSuccess() {
+        // Clear test data via the debug call() endpoint
+        val result = contentResolver.call(
+            Uri.parse(IpcContract.BASE_URI),
+            "clear_test_data",
+            null,
+            null,
+        )
+
+        assertNotNull("clear_test_data should return a non-null Bundle", result)
+        assertTrue(
+            "clear_test_data should return success=true",
+            result!!.getBoolean("success", false),
+        )
+    }
+
+    // ── Layer 6: Seeded Data Verification ──────────────────────────────
+
+    @Test
+    fun contentProvider_afterSeeding_returnsNonEmptyCursor() {
+        // Seed first via call()
+        contentResolver.call(
+            Uri.parse(IpcContract.BASE_URI),
+            "seed_test_data",
+            null,
+            null,
+        )
+
+        // Query all profiles — should now have at least one row
+        val cursor = contentResolver.query(
+            SmsProviderContract.CONTACT_PROFILES_URI,
+            null, null, null, null,
+        )
+
+        assertNotNull("Cursor should not be null after seeding", cursor)
+        cursor!!.use { c ->
+            Log.i(TAG, "After seeding: cursor has ${c.count} rows")
+            assertTrue(
+                "Cursor should contain at least 1 row after seeding",
+                c.count > 0,
+            )
+        }
+    }
+
+    @Test
+    fun contentProvider_afterSeeding_singleProfileHasPlaintextData() {
+        // Seed via call()
+        contentResolver.call(
+            Uri.parse(IpcContract.BASE_URI),
+            "seed_test_data",
+            null,
+            null,
+        )
+
+        // Query the specific seeded profile (contactId=1)
+        val uri = Uri.withAppendedPath(
+            SmsProviderContract.CONTACT_PROFILES_URI,
+            "1",
+        )
+        val cursor = contentResolver.query(uri, null, null, null, null)
+
+        assertNotNull("Single profile cursor should not be null", cursor)
+        cursor!!.use { c ->
+            assertEquals(
+                "Seeded profile for contactId=1 should return exactly 1 row",
+                1,
+                c.count,
+            )
+
+            assertTrue("Cursor should move to first row", c.moveToFirst())
+
+            // Verify plaintext columns are present and non-empty
+            val language = c.getString(
+                c.getColumnIndexOrThrow(IpcContract.ProfileColumns.DOMINANT_LANGUAGE),
+            )
+            val tone = c.getString(
+                c.getColumnIndexOrThrow(IpcContract.ProfileColumns.TONE),
+            )
+
+            assertNotNull("dominant_language should not be null", language)
+            assertNotNull("tone should not be null", tone)
+            assertTrue(
+                "dominant_language should be non-empty",
+                language.isNotEmpty(),
+            )
+            assertTrue(
+                "tone should be non-empty",
+                tone.isNotEmpty(),
+            )
+
+            Log.i(TAG, "Seeded profile language: $language, tone: $tone")
+        }
+    }
+
+    @Test
+    fun contentProvider_afterClear_returnsEmptyCursor() {
+        // Seed then clear
+        contentResolver.call(
+            Uri.parse(IpcContract.BASE_URI),
+            "seed_test_data",
+            null,
+            null,
+        )
+        contentResolver.call(
+            Uri.parse(IpcContract.BASE_URI),
+            "clear_test_data",
+            null,
+            null,
+        )
+
+        // Query the cleared profile — should be empty
+        val uri = Uri.withAppendedPath(
+            SmsProviderContract.CONTACT_PROFILES_URI,
+            "1",
+        )
+        val cursor = contentResolver.query(uri, null, null, null, null)
+
+        assertNotNull("Cursor should not be null after clear", cursor)
+        cursor!!.use { c ->
+            assertEquals(
+                "Cursor should be empty after clearing test data",
+                0,
+                c.count,
+            )
+        }
     }
 }

@@ -69,6 +69,7 @@ object IpcContract {
 
     /** Column name constants for contact profiles */
     object ProfileColumns {
+        const val CONTACT_ID = "contact_id"
         const val DOMINANT_LANGUAGE = "dominant_language"
         const val TONE = "tone"
         const val AVG_RESPONSE_LENGTH = "avg_response_length"

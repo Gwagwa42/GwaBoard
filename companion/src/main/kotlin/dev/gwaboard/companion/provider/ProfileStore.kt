@@ -33,6 +33,25 @@ class ProfileStore {
     }
 
     /**
+     * Retrieve the [ContactProfile] for a specific contact.
+     *
+     * @param contactId System contact identifier
+     * @return The [ContactProfile], or `null` if no profile exists
+     */
+    fun getProfileObject(contactId: Long): ContactProfile? {
+        return profiles[contactId]
+    }
+
+    /**
+     * Retrieve all stored profiles as (contactId, [ContactProfile]) pairs.
+     *
+     * @return Map of contact IDs to their [ContactProfile] instances
+     */
+    fun getAllProfileObjects(): Map<Long, ContactProfile> {
+        return profiles.toMap()
+    }
+
+    /**
      * Retrieve the profile JSON for a specific contact.
      *
      * @param contactId System contact identifier

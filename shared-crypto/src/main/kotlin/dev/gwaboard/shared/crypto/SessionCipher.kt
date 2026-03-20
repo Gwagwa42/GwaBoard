@@ -5,11 +5,19 @@ import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 
 /**
- * AES-256-GCM encrypt/decrypt operations for IPC payload protection.
+ * AES-256-GCM encrypt/decrypt operations for local data-at-rest protection.
  *
  * Each encryption generates a fresh 12-byte IV (never reused).
  * The GCM authentication tag (128-bit) is appended to the ciphertext
  * by the Android Cipher implementation.
+ *
+ * **Note**: This cipher is intended for app-local encryption only (e.g.,
+ * caching sensitive data on disk). It must NOT be used for cross-app IPC
+ * because Android Keystore keys are UID-bound — two apps with different
+ * UIDs will each generate distinct keys under the same alias, causing
+ * AEADBadTagException on decryption. IPC between keyboard and companion
+ * is protected by signature-level permissions and runtime certificate
+ * verification instead.
  *
  * Usage:
  * ```
