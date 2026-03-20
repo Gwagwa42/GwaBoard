@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">GwaBoard Companion</string>
+
+    <!-- Welcome screen -->
+    <string name="welcome_title">GwaBoard Companion</string>
+    <string name="welcome_description">This utility app provides SMS context to the GwaBoard keyboard for smarter suggestions. All data stays on your device — no internet access required.</string>
+    <string name="welcome_get_started">Get Started</string>
+
+    <!-- Permission screen -->
+    <string name="permissions_title">Permissions</string>
+    <string name="permissions_description">GwaBoard Companion needs the following permissions to build context profiles from your messages:</string>
+    <string name="permission_read_sms">Read SMS — analyze message patterns</string>
+    <string name="permission_receive_sms">Receive SMS — real-time context updates</string>
+    <string name="permission_send_sms">Send SMS — default SMS handler capability</string>
+    <string name="permission_read_contacts">Read Contacts — personalize suggestions</string>
+    <string name="permissions_grant">Grant Permissions</string>
+    <string name="permissions_skip">Skip for now</string>
+
+    <!-- Default SMS screen -->
+    <string name="default_sms_title">Default SMS App</string>
+    <string name="default_sms_description">For the best experience, set GwaBoard Companion as your default SMS handler. This allows real-time profile building from incoming messages.</string>
+    <string name="default_sms_set">Set as Default</string>
+    <string name="default_sms_skip">Maybe Later</string>
+
+    <!-- Dashboard screen -->
+    <string name="dashboard_title">Dashboard</string>
+    <string name="dashboard_profiles_built">Profiles Built</string>
+    <string name="dashboard_last_sync">Last Sync</string>
+    <string name="dashboard_keyboard_status">Keyboard Connection</string>
+    <string name="dashboard_status_connected">Connected</string>
+    <string name="dashboard_status_disconnected">Disconnected</string>
+    <string name="dashboard_never">Never</string>
+
+    <!-- Settings screen -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_reanalyze_frequency">Re-analyze Frequency</string>
+    <string name="settings_profile_detail">Profile Detail Level</string>
+    <string name="settings_delete_data">Delete All My Data</string>
+    <string name="settings_delete_data_description">Permanently remove all profiles and cached data. This action cannot be undone.</string>
+    <string name="settings_delete_confirm_title">Delete All Data?</string>
+    <string name="settings_delete_confirm_message">This will permanently remove all profiles, analysis data, and cached content. This action cannot be undone.</string>
+    <string name="settings_delete_confirm">Delete Everything</string>
+    <string name="settings_cancel">Cancel</string>
+
+    <!-- Navigation -->
+    <string name="nav_dashboard">Dashboard</string>
+    <string name="nav_settings">Settings</string>
+</resources>
