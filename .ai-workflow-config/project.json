@@ -1,10 +1,10 @@
 {
   "version": "2.1.0",
   "project_name": "GwaBoard",
-  "modules": {},
+  "modules": {"buildSrc": {"path": "buildSrc/", "label": "scope:buildSrc", "test_task": null},"shared-crypto": {"path": "shared-crypto/", "label": "scope:shared-crypto", "test_task": null},"shared-ipc": {"path": "shared-ipc/", "label": "scope:shared-ipc", "test_task": null},"shared-models": {"path": "shared-models/", "label": "scope:shared-models", "test_task": null}},
   "build": {
-    "tool": "unknown",
-    "command": "",
+    "tool": "gradle",
+    "command": "./gradlew",
     "unit_test_task": null,
     "self_test_task": null,
     "all_tests_task": null,
@@ -12,7 +12,7 @@
   },
   "module_dependencies": {},
   "shared_modules": [],
-  "default_module": null,
+  "default_module": "buildSrc",
   "patterns": {
     "migration": "",
     "migration_naming": "",
@@ -26,6 +26,7 @@
   },
   "stack": {
     "languages": [
+  "kotlin",
   "python"
 ],
     "frameworks": [],
@@ -42,7 +43,7 @@
     "_source": "issue-stack-analyzer",
     "_analyzed_at": "2026-03-20",
     "_issue_count": 20,
-    "_milestone_count": 9,
+    "_milestone_count": 8,
     "languages": [
   "kotlin"
 ],
@@ -52,7 +53,7 @@
     "orm": null,
     "di": null,
     "architecture": null,
-    "signals": [{"tech":"sqlite","source":"issue:20,issue:9","confidence":"medium"},{"tech":"kotlin","source":"issue:4,issue:11,issue:2,milestone:2","confidence":"high"}]
+    "signals": [{"tech":"sqlite","source":"issue:20,issue:9","confidence":"medium"},{"tech":"kotlin","source":"issue:4,issue:11,issue:2","confidence":"high"}]
   }
   },
   "council": {
