@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base theme for the companion app — Material 3 with no action bar.
+         Compose handles all theming via CompanionTheme. -->
+    <style name="Theme.GwaBoard.Companion" parent="android:Theme.Material.Light.NoActionBar" />
+</resources>

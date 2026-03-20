@@ -1,4 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <application />
+
+    <!-- Custom signature-level permission for IPC.
+         Only apps signed with the same certificate can hold this permission,
+         preventing rogue apps from querying the ContentProvider. -->
+    <permission
+        android:name="dev.gwaboard.permission.READ_SMS_IPC"
+        android:protectionLevel="signature"
+        android:label="@string/permission_read_sms_ipc_label"
+        android:description="@string/permission_read_sms_ipc_description" />
+
+    <!-- SMS permissions — requested at runtime via permission flow -->
+    <uses-permission android:name="android.permission.READ_SMS" />
+    <uses-permission android:name="android.permission.RECEIVE_SMS" />
+    <uses-permission android:name="android.permission.SEND_SMS" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+
+    <application
+        android:name=".CompanionApplication"
+        android:allowBackup="false"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.GwaBoard.Companion">
+
+        <activity
+            android:name=".CompanionActivity"
+            android:exported="true"
+            android:theme="@style/Theme.GwaBoard.Companion">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- SMS data provider with 3-layer security:
+             1. OS-level: signature permission (Android enforced)
+             2. App-level: certificate verification in SmsContentProvider.validateCaller()
+             3. Payload: AES-256-GCM encryption on response data -->
+        <provider
+            android:name=".provider.SmsContentProvider"
+            android:authorities="dev.gwaboard.companion.provider"
+            android:exported="true"
+            android:readPermission="dev.gwaboard.permission.READ_SMS_IPC" />
+    </application>
 </manifest>
