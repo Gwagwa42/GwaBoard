@@ -11,12 +11,18 @@ import javax.crypto.SecretKey
  *
  * Keys are hardware-backed on supported devices (Tensor G3 on Pixel 8A)
  * and tied to the calling app's UID — no other app can access them.
+ *
+ * **Important**: Because Keystore keys are UID-bound, they cannot be shared
+ * between the keyboard and companion apps (different UIDs). Two apps using
+ * the same alias will each get a distinct key, causing AEADBadTagException
+ * on cross-app decryption. Use this helper only for app-local encryption
+ * (e.g., local data-at-rest protection), not for IPC payload encryption.
  */
 object KeystoreHelper {
 
     private const val KEYSTORE_PROVIDER = "AndroidKeyStore"
 
-    /** Default alias for the IPC encryption key shared between keyboard and companion */
+    /** Default alias for the app-local AES-256 encryption key (e.g., data-at-rest) */
     const val IPC_KEY_ALIAS = "gwaboard_ipc_aes256"
 
     /**

@@ -136,9 +136,11 @@ class IpcCommunicationTest {
     // ── Layer 3: Column Schema Validation ────────────────────────────
 
     @Test
-    fun contentProvider_columns_matchExpectedSchema() {
-        // Diagnoses the column mismatch bug: SmsContentProvider returns
-        // encrypted columns, but SmsProviderClient expects plaintext columns.
+    fun contentProvider_columns_matchPlaintextSchema() {
+        // Validates that SmsContentProvider returns plaintext columns
+        // matching IpcContract.ProfileColumns, which SmsProviderClient
+        // reads directly. Encryption was removed because Android Keystore
+        // keys are UID-bound (see issue #51).
 
         val cursor = contentResolver.query(
             SmsProviderContract.CONTACT_PROFILES_URI,
@@ -148,11 +150,9 @@ class IpcCommunicationTest {
         cursor.use { c ->
             val actualColumns = c.columnNames.toSet()
 
-            // Columns returned by SmsContentProvider (encrypted schema)
-            val encryptedColumns = setOf("contact_id", "encrypted_data", "encrypted_iv")
-
             // Columns expected by SmsProviderClient (plaintext schema)
-            val plaintextColumns = setOf(
+            val expectedColumns = setOf(
+                IpcContract.ContactColumns.CONTACT_ID,
                 IpcContract.ProfileColumns.DOMINANT_LANGUAGE,
                 IpcContract.ProfileColumns.TONE,
                 IpcContract.ProfileColumns.AVG_RESPONSE_LENGTH,
@@ -160,29 +160,13 @@ class IpcCommunicationTest {
                 IpcContract.ProfileColumns.STYLE_EMBEDDING,
             )
 
-            Log.w(TAG, "=== COLUMN SCHEMA DIAGNOSTIC ===")
-            Log.w(TAG, "Actual columns from provider: $actualColumns")
-            Log.w(TAG, "Encrypted columns (provider sends): $encryptedColumns")
-            Log.w(TAG, "Plaintext columns (client expects): $plaintextColumns")
+            Log.i(TAG, "=== COLUMN SCHEMA VALIDATION ===")
+            Log.i(TAG, "Actual columns from provider: $actualColumns")
+            Log.i(TAG, "Expected plaintext columns: $expectedColumns")
 
-            val hasEncryptedSchema = actualColumns.containsAll(encryptedColumns)
-            val hasPlaintextSchema = actualColumns.containsAll(plaintextColumns)
-
-            if (hasEncryptedSchema && !hasPlaintextSchema) {
-                Log.e(
-                    TAG,
-                    "BUG CONFIRMED: Provider returns encrypted columns but " +
-                        "client expects plaintext columns. SmsProviderClient needs " +
-                        "a decryption layer.",
-                )
-            }
-
-            // This assertion documents the current (broken) state.
-            // When the bug is fixed, change this to assert plaintext or
-            // encrypted+decryption columns as appropriate.
             assertTrue(
-                "Provider should return encrypted columns (current schema)",
-                hasEncryptedSchema,
+                "Provider should return plaintext profile columns matching IpcContract.ProfileColumns",
+                actualColumns.containsAll(expectedColumns),
             )
         }
     }
