@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Signature-level IPC permission to read SMS context from companion app -->
+    <uses-permission android:name="dev.gwaboard.permission.READ_SMS_IPC" />
+
+    <!-- NO INTERNET, NO READ_SMS, NO READ_CONTACTS — privacy-first design -->
+
+    <application
+        android:allowBackup="false"
+        android:label="@string/app_name"
+        android:supportsRtl="true">
+
+        <!-- IME service declaration -->
+        <service
+            android:name=".GwaBoardImeService"
+            android:label="@string/app_name"
+            android:permission="android.permission.BIND_INPUT_METHOD"
+            android:directBootAware="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.view.InputMethod" />
+            </intent-filter>
+            <meta-data
+                android:name="android.view.im"
+                android:resource="@xml/method" />
+        </service>
+
+    </application>
+
+</manifest>
