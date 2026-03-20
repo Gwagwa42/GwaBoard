@@ -1,3 +1,6 @@
 [submodule ".ai-workflow"]
 	path = .ai-workflow
 	url = git@github.com:Gwagwa42/ai-pipeline.git
+[submodule "florisboard"]
+	path = florisboard
+	url = https://github.com/Gwagwa42/florisboard.git

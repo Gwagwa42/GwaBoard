@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">GwaBoard</string>
+    <string name="subtype_fr_azerty">Francais (AZERTY)</string>
+    <string name="subtype_en_qwerty">English (QWERTY)</string>
+</resources>
