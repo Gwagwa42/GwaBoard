@@ -3,23 +3,18 @@ package dev.gwaboard.keyboard.privacy
 import android.content.Context
 import android.content.Intent
 import dev.gwaboard.shared.models.IpcContract
+import io.mockk.every
+import io.mockk.mockk
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.mockito.Mockito.mock
 
-/**
- * Tests for [DataDeletionReceiver] broadcast handling.
- *
- * Verifies that the receiver correctly dispatches to the registered
- * callbacks when data deletion broadcasts are received.
- */
 class DataDeletionReceiverTest {
 
-    private val context = mock(Context::class.java)
+    private val context = mockk<Context>(relaxed = true)
     private val receiver = DataDeletionReceiver()
 
     @Before
@@ -39,7 +34,9 @@ class DataDeletionReceiverTest {
         var callbackInvoked = false
         DataDeletionReceiver.onAllDataDeleted = { callbackInvoked = true }
 
-        val intent = Intent(IpcContract.Actions.DATA_DELETED_ALL)
+        val intent = mockk<Intent> {
+            every { action } returns IpcContract.Actions.DATA_DELETED_ALL
+        }
         receiver.onReceive(context, intent)
 
         assertTrue("onAllDataDeleted callback should have been invoked", callbackInvoked)
@@ -50,8 +47,9 @@ class DataDeletionReceiverTest {
         var receivedAddress: String? = null
         DataDeletionReceiver.onContactDataDeleted = { address -> receivedAddress = address }
 
-        val intent = Intent(IpcContract.Actions.DATA_DELETED_CONTACT).apply {
-            putExtra(IpcContract.Extras.CONTACT_ADDRESS, "+33612345678")
+        val intent = mockk<Intent> {
+            every { action } returns IpcContract.Actions.DATA_DELETED_CONTACT
+            every { getStringExtra(IpcContract.Extras.CONTACT_ADDRESS) } returns "+33612345678"
         }
         receiver.onReceive(context, intent)
 
@@ -63,8 +61,10 @@ class DataDeletionReceiverTest {
         var callbackInvoked = false
         DataDeletionReceiver.onContactDataDeleted = { callbackInvoked = true }
 
-        val intent = Intent(IpcContract.Actions.DATA_DELETED_CONTACT)
-        // No extra set — should handle gracefully
+        val intent = mockk<Intent> {
+            every { action } returns IpcContract.Actions.DATA_DELETED_CONTACT
+            every { getStringExtra(IpcContract.Extras.CONTACT_ADDRESS) } returns null
+        }
         receiver.onReceive(context, intent)
 
         assertFalse("Callback should not be invoked without address extra", callbackInvoked)
@@ -72,9 +72,9 @@ class DataDeletionReceiverTest {
 
     @Test
     fun `broadcast with no registered callbacks does not crash`() {
-        // Both callbacks are null — should handle gracefully
-        val intent = Intent(IpcContract.Actions.DATA_DELETED_ALL)
+        val intent = mockk<Intent> {
+            every { action } returns IpcContract.Actions.DATA_DELETED_ALL
+        }
         receiver.onReceive(context, intent)
-        // No exception = pass
     }
 }

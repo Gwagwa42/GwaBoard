@@ -2,38 +2,30 @@ package dev.gwaboard.keyboard.privacy
 
 import android.content.Context
 import android.content.SharedPreferences
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.mockito.Mockito.any
-import org.mockito.Mockito.anyInt
-import org.mockito.Mockito.anyString
-import org.mockito.Mockito.mock
-import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when`
 
-/**
- * Tests for [PrivacyPreferences] SharedPreferences wrapper.
- *
- * Verifies default values and persistence of privacy settings.
- */
 class PrivacyPreferencesTest {
 
-    private val sharedPrefs = mock(SharedPreferences::class.java)
-    private val editor = mock(SharedPreferences.Editor::class.java)
-    private val context = mock(Context::class.java)
+    private val sharedPrefs = mockk<SharedPreferences>(relaxed = true)
+    private val editor = mockk<SharedPreferences.Editor>(relaxed = true)
+    private val context = mockk<Context>()
 
     @Before
     fun setUp() {
-        `when`(context.getSharedPreferences(anyString(), anyInt())).thenReturn(sharedPrefs)
-        `when`(sharedPrefs.edit()).thenReturn(editor)
-        `when`(editor.putBoolean(anyString(), any())).thenReturn(editor)
+        every { context.getSharedPreferences(any(), any()) } returns sharedPrefs
+        every { sharedPrefs.edit() } returns editor
+        every { editor.putBoolean(any(), any()) } returns editor
     }
 
     @Test
     fun `AI suggestions enabled by default`() {
-        `when`(sharedPrefs.getBoolean("ai_suggestions_enabled", true)).thenReturn(true)
+        every { sharedPrefs.getBoolean("ai_suggestions_enabled", true) } returns true
 
         val prefs = PrivacyPreferences(context)
         assertTrue(prefs.isAiSuggestionsEnabled)
@@ -41,18 +33,18 @@ class PrivacyPreferencesTest {
 
     @Test
     fun `disabling AI suggestions persists the value`() {
-        `when`(sharedPrefs.getBoolean("ai_suggestions_enabled", true)).thenReturn(false)
+        every { sharedPrefs.getBoolean("ai_suggestions_enabled", true) } returns false
 
         val prefs = PrivacyPreferences(context)
         prefs.isAiSuggestionsEnabled = false
 
-        verify(editor).putBoolean("ai_suggestions_enabled", false)
-        verify(editor).apply()
+        verify { editor.putBoolean("ai_suggestions_enabled", false) }
+        verify { editor.apply() }
     }
 
     @Test
     fun `privacy policy not acknowledged by default`() {
-        `when`(sharedPrefs.getBoolean("privacy_acknowledged", false)).thenReturn(false)
+        every { sharedPrefs.getBoolean("privacy_acknowledged", false) } returns false
 
         val prefs = PrivacyPreferences(context)
         assertFalse(prefs.isPrivacyPolicyAcknowledged)
