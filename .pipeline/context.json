@@ -1,8 +1,8 @@
 {
-  "run_id": "run-5-1774003175401977000-95460",
+  "run_id": "run-6-1774003176687748000-95687",
   "issue": {
-    "number": 5,
-    "title": "Create :shared-crypto module (AES-256-GCM)",
+    "number": 6,
+    "title": "Create :shared-ipc module (ContentProvider client)",
     "type": "chore",
     "labels": [
       "module:shared",
@@ -42,8 +42,8 @@
     "modules": []
   },
   "token_budget": 1000,
-  "branch_name": "chore/issue-5-create-shared-crypto-module-aes-256-gcm",
-  "worktree_path": "/Users/gwagwa/Documents/Projects/GwaBoard/.ai-workflow/worktrees/issue-5",
+  "branch_name": "chore/issue-6-create-shared-ipc-module-contentprovider",
+  "worktree_path": "/Users/gwagwa/Documents/Projects/GwaBoard/.ai-workflow/worktrees/issue-6",
   "context_level": "MEDIUM",
   "decisions": {
     "skip_planning": false,
