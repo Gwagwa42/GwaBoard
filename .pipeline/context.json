@@ -1,12 +1,12 @@
 {
-  "run_id": "run-6-1774003176687748000-95687",
+  "run_id": "run-16-1774015980481414000-12712",
   "issue": {
-    "number": 6,
-    "title": "Create :shared-ipc module (ContentProvider client)",
+    "number": 16,
+    "title": "Implement SmsContextProvider (keyboard-side IPC)",
     "type": "chore",
     "labels": [
-      "module:shared",
-      "security\n"
+      "module:keyboard",
+      "module:shared\n"
     ],
     "modules": [],
     "complexity": "UNKNOWN",
@@ -42,8 +42,8 @@
     "modules": []
   },
   "token_budget": 1000,
-  "branch_name": "chore/issue-6-create-shared-ipc-module-contentprovider",
-  "worktree_path": "/Users/gwagwa/Documents/Projects/GwaBoard/.ai-workflow/worktrees/issue-6",
+  "branch_name": "chore/issue-16-implement-smscontextprovider-keyboard-si",
+  "worktree_path": "/Users/gwagwa/Documents/Projects/GwaBoard/.ai-workflow/worktrees/issue-16",
   "context_level": "MEDIUM",
   "decisions": {
     "skip_planning": false,
