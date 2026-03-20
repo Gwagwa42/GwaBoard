@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Android library module — no permissions required.
+         Encryption keys are scoped to the calling app's UID via Android Keystore. -->
+</manifest>
