@@ -172,7 +172,7 @@ class SmsContentProvider : ContentProvider() {
 
         for ((contactId, profile) in profileStore.getAllProfileObjects()) {
             cursor.addRow(
-                arrayOf(
+                arrayOf<Any>(
                     contactId,
                     profile.dominantLanguage,
                     profile.tone,
@@ -198,7 +198,7 @@ class SmsContentProvider : ContentProvider() {
         val profile = profileStore.getProfileObject(contactId) ?: return cursor
 
         cursor.addRow(
-            arrayOf(
+            arrayOf<Any>(
                 contactId,
                 profile.dominantLanguage,
                 profile.tone,
