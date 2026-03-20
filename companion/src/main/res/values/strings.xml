@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">GwaBoard Companion</string>
+    <string name="permission_read_sms_ipc_label">Read SMS data via GwaBoard IPC</string>
+    <string name="permission_read_sms_ipc_description">Allows the GwaBoard keyboard to read SMS profiles via secure inter-process communication. Only apps signed with the same certificate can obtain this permission.</string>
+</resources>
