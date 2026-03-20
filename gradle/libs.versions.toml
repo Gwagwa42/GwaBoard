@@ -11,6 +11,7 @@ targetSdk = "36"
 
 # NDK — pinned for llama.cpp reproducibility
 ndk = "27.2.12479018"
+cmake = "3.22.1"
 
 # AndroidX
 core-ktx = "1.16.0"
@@ -47,6 +48,10 @@ mockk = "1.13.16"
 detekt = "1.23.7"
 
 [libraries]
+# Gradle plugins (for buildSrc)
+android-gradle-plugin = { module = "com.android.tools.build:gradle", version.ref = "agp" }
+kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+
 # AndroidX Core
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
