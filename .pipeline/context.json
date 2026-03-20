@@ -1,0 +1,63 @@
+{
+  "run_id": "run-4-1774002996197121000-90092",
+  "issue": {
+    "number": 4,
+    "title": "Create :shared-models module (pure Kotlin)",
+    "type": "chore",
+    "labels": [
+      "module:shared\n"
+    ],
+    "modules": [],
+    "complexity": "UNKNOWN",
+    "description": "",
+    "acceptance_criteria": "",
+    "technical_notes": ""
+  },
+  "complexity": {
+    "score": 7,
+    "level": "MEDIUM",
+    "factors": {
+      "file_count": {
+        "value": 5,
+        "score": 3
+      },
+      "module_count": {
+        "value": 0,
+        "score": 4
+      },
+      "security_files": {
+        "detected": false,
+        "score": 0
+      },
+      "migration_files": {
+        "detected": false,
+        "score": 0
+      },
+      "shared_changed": {
+        "detected": false,
+        "score": 0
+      }
+    },
+    "modules": []
+  },
+  "token_budget": 1000,
+  "branch_name": "chore/issue-4-create-shared-models-module-pure-kotlin",
+  "worktree_path": "/Users/gwagwa/Documents/Projects/GwaBoard/.ai-workflow/worktrees/issue-4",
+  "context_level": "MEDIUM",
+  "decisions": {
+    "skip_planning": false,
+    "skip_review": false,
+    "require_checkpoint": false
+  },
+  "similar_issues": [],
+  "predicted_files": [],
+  "rag_context": {},
+  "decomposition": {
+    "should_decompose": false,
+    "reason": "criteres non atteints (modules=0 < 2, fichiers=0 < 5)",
+    "depth": 0,
+    "max_depth": 3,
+    "max_sub_issues": 10,
+    "parent_issue": null
+  }
+}
