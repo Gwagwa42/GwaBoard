@@ -1,11 +1,12 @@
 {
-  "run_id": "run-4-1774002996197121000-90092",
+  "run_id": "run-5-1774003175401977000-95460",
   "issue": {
-    "number": 4,
-    "title": "Create :shared-models module (pure Kotlin)",
+    "number": 5,
+    "title": "Create :shared-crypto module (AES-256-GCM)",
     "type": "chore",
     "labels": [
-      "module:shared\n"
+      "module:shared",
+      "security\n"
     ],
     "modules": [],
     "complexity": "UNKNOWN",
@@ -41,8 +42,8 @@
     "modules": []
   },
   "token_budget": 1000,
-  "branch_name": "chore/issue-4-create-shared-models-module-pure-kotlin",
-  "worktree_path": "/Users/gwagwa/Documents/Projects/GwaBoard/.ai-workflow/worktrees/issue-4",
+  "branch_name": "chore/issue-5-create-shared-crypto-module-aes-256-gcm",
+  "worktree_path": "/Users/gwagwa/Documents/Projects/GwaBoard/.ai-workflow/worktrees/issue-5",
   "context_level": "MEDIUM",
   "decisions": {
     "skip_planning": false,
