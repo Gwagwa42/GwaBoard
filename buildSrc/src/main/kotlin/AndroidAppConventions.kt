@@ -1,7 +1,9 @@
 import com.android.build.api.dsl.ApplicationExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.tasks.testing.Test
 import org.gradle.kotlin.dsl.configure
+import org.gradle.kotlin.dsl.withType
 
 /**
  * Convention plugin for Android application modules (keyboard, companion).
@@ -11,32 +13,38 @@ import org.gradle.kotlin.dsl.configure
  */
 class AndroidAppConventions : Plugin<Project> {
 
-    override fun apply(target: Project) = with(target) {
-        pluginManager.apply("com.android.application")
-        pluginManager.apply("org.jetbrains.kotlin.android")
+    override fun apply(target: Project) {
+        with(target) {
+            pluginManager.apply("com.android.application")
+            pluginManager.apply("org.jetbrains.kotlin.android")
 
-        extensions.configure<ApplicationExtension> {
-            val catalog = project.versionCatalog()
+            extensions.configure<ApplicationExtension> {
+                val catalog = project.versionCatalog()
 
-            compileSdk = catalog.findVersion("compileSdk").get().requiredVersion.toInt()
+                compileSdk = catalog.findVersion("compileSdk").get().requiredVersion.toInt()
 
-            defaultConfig {
-                minSdk = catalog.findVersion("minSdk").get().requiredVersion.toInt()
-                targetSdk = catalog.findVersion("targetSdk").get().requiredVersion.toInt()
+                defaultConfig {
+                    minSdk = catalog.findVersion("minSdk").get().requiredVersion.toInt()
+                    targetSdk = catalog.findVersion("targetSdk").get().requiredVersion.toInt()
 
-                testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+                    testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+                }
+
+                compileOptions {
+                    sourceCompatibility = org.gradle.api.JavaVersion.VERSION_17
+                    targetCompatibility = org.gradle.api.JavaVersion.VERSION_17
+                }
+
+                buildFeatures {
+                    buildConfig = true
+                }
             }
 
-            compileOptions {
-                sourceCompatibility = org.gradle.api.JavaVersion.VERSION_17
-                targetCompatibility = org.gradle.api.JavaVersion.VERSION_17
-            }
+            configureKotlinJvmTarget()
 
-            buildFeatures {
-                buildConfig = true
+            tasks.withType<Test> {
+                useJUnit()
             }
         }
-
-        configureKotlinJvmTarget()
     }
 }
