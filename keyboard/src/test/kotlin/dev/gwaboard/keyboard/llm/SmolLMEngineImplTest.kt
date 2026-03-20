@@ -5,6 +5,7 @@ import dev.gwaboard.shared.models.ContactProfile
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -34,7 +35,7 @@ class SmolLMEngineImplTest {
     @Before
     fun setup() {
         bridge = mockk(relaxed = true)
-        engine = SmolLMEngineImpl(bridge, config)
+        engine = SmolLMEngineImpl(bridge, config, ioContext = UnconfinedTestDispatcher())
     }
 
     // -- Lifecycle tests --

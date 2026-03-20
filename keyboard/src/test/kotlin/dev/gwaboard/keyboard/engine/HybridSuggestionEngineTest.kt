@@ -2,8 +2,10 @@ package dev.gwaboard.keyboard.engine
 
 import dev.gwaboard.shared.models.ContactProfile
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -23,6 +25,7 @@ class HybridSuggestionEngineTest {
     private lateinit var ngramEngine: NGramEngine
     private lateinit var fakeLLM: FakeSmolLMEngine
     private lateinit var hybridEngine: HybridSuggestionEngine
+    private lateinit var testScope: TestScope
     private var fakeTimeMs: Long = 1000L
 
     @Before
@@ -30,11 +33,18 @@ class HybridSuggestionEngineTest {
         ngramEngine = NGramEngine(storage = null, maxOrder = 3)
         fakeLLM = FakeSmolLMEngine()
         fakeTimeMs = 1000L
+        testScope = TestScope()
         hybridEngine = HybridSuggestionEngine(
             ngramEngine = ngramEngine,
             smolLMEngine = fakeLLM,
             clock = { fakeTimeMs },
+            backgroundScope = testScope,
         )
+    }
+
+    @After
+    fun teardown() {
+        hybridEngine.close()
     }
 
     // --- Tier 1 only (suggest) ---

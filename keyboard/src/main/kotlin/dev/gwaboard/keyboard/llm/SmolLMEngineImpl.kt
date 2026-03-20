@@ -5,6 +5,7 @@ import dev.gwaboard.keyboard.engine.SmolLMEngine
 import dev.gwaboard.keyboard.engine.Suggestion
 import dev.gwaboard.keyboard.engine.SuggestionSource
 import dev.gwaboard.shared.models.ContactProfile
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -30,6 +31,7 @@ import java.util.concurrent.atomic.AtomicReference
 class SmolLMEngineImpl(
     private val bridge: LlamaCppBridge,
     private val config: SmolLMConfig = SmolLMConfig(),
+    private val ioContext: CoroutineContext = Dispatchers.Default,
 ) : SmolLMEngine {
 
     /** Current lifecycle state, readable without locks for fast checks. */
@@ -62,7 +64,7 @@ class SmolLMEngineImpl(
             Log.i(TAG, "Loading model: ${config.modelPath} (threads=${config.nThreads})")
 
             try {
-                val handle = withContext(Dispatchers.Default) {
+                val handle = withContext(ioContext) {
                     bridge.loadModel(config.modelPath, config.nThreads)
                 }
 
@@ -102,7 +104,7 @@ class SmolLMEngineImpl(
                 val handle = contextHandle
                 contextHandle = 0L
 
-                withContext(Dispatchers.Default) {
+                withContext(ioContext) {
                     bridge.unloadModel(handle)
                 }
 
@@ -149,7 +151,7 @@ class SmolLMEngineImpl(
 
             state.set(EngineState.INFERRING)
             try {
-                val rawOutput = withContext(Dispatchers.Default) {
+                val rawOutput = withContext(ioContext) {
                     bridge.infer(handle, prompt, config.maxTokens)
                 }
 

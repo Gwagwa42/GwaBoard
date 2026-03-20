@@ -43,6 +43,9 @@ android {
     testOptions {
         unitTests {
             isReturnDefaultValues = true
+            all {
+                it.forkEvery = 1
+            }
         }
     }
 }

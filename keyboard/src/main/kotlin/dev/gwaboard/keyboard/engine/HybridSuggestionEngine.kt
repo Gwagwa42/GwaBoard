@@ -2,8 +2,12 @@ package dev.gwaboard.keyboard.engine
 
 import android.util.Log
 import dev.gwaboard.shared.models.ContactProfile
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -30,7 +34,16 @@ class HybridSuggestionEngine(
     private val ngramEngine: NGramEngine,
     private val smolLMEngine: SmolLMEngine? = null,
     private val clock: () -> Long = System::currentTimeMillis,
+    backgroundScope: CoroutineScope? = null,
 ) : SuggestionEngine {
+
+    /**
+     * Scope for background tasks (inactivity unload timer) that must outlive
+     * individual [suggestWithTier2] calls. Uses a SupervisorJob so failures
+     * in the timer don't cancel unrelated work.
+     */
+    private val backgroundScope: CoroutineScope =
+        backgroundScope ?: CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     /** Timestamp of the last Tier 2 usage, for inactivity-based unloading. */
     private val lastTier2UsageMs = AtomicLong(0L)
@@ -158,7 +171,7 @@ class HybridSuggestionEngine(
     }
 
     override fun close() {
-        unloadJob?.cancel()
+        backgroundScope.cancel()
         ngramEngine.close()
         smolLMEngine?.close()
         Log.i(TAG, "HybridSuggestionEngine closed")
@@ -189,13 +202,12 @@ class HybridSuggestionEngine(
 
     /**
      * Schedules Tier 2 unloading after [INACTIVITY_TIMEOUT_MS] of no Tier 2 calls.
-     * Cancels any previously scheduled unload job.
+     * Cancels any previously scheduled unload job. Runs in [backgroundScope] so
+     * the timer outlives individual [suggestWithTier2] calls.
      */
-    private fun kotlinx.coroutines.CoroutineScope.scheduleUnloadAfterInactivity(
-        engine: SmolLMEngine,
-    ) {
+    private fun scheduleUnloadAfterInactivity(engine: SmolLMEngine) {
         unloadJob?.cancel()
-        unloadJob = launch {
+        unloadJob = backgroundScope.launch {
             delay(INACTIVITY_TIMEOUT_MS)
             // Only unload if no Tier 2 usage happened during the delay
             val elapsed = clock() - lastTier2UsageMs.get()
