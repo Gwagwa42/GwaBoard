@@ -2,6 +2,10 @@ plugins {
     id("AndroidLibraryConventions")
 }
 
+android {
+    namespace = "dev.gwaboard.shared.crypto"
+}
+
 dependencies {
     // AndroidX Security — used alongside direct Keystore APIs for future compatibility
     implementation(libs.androidx.security.crypto)

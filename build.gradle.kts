@@ -5,13 +5,6 @@ plugins {
     // Submodules apply what they need individually
 }
 
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-    }
-}
-
 subprojects {
     tasks.withType<Test> {
         useJUnitPlatform()
